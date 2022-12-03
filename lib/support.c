@@ -59,6 +59,45 @@ StdIn_ReadLine(void)
     return line;
 }
 
+Slice
+Slice_ReadLine(Slice *slice)
+{
+    if (slice == NULL || slice->data == NULL || slice->size == 0) {
+        return EmptySlice;
+    }
+
+    char *cursor = (char *) slice->data;
+    u64 available = slice->size;
+
+    u64 new_size = 0;
+
+    while (*cursor != '\n' && *cursor != '\0' && available > 0) {
+        cursor++;
+        available--;
+        new_size++;
+    }
+
+    Slice result;
+
+    if (available > 0) {
+        *cursor = '\0';
+
+        result.data = slice->data;
+        result.size = new_size;
+
+        slice->data = cursor + 1;
+        slice->size = slice->size - new_size - 1;
+    } else {
+        result.data = slice->data;
+        result.size = slice->size;
+
+        slice->data = NULL;
+        slice->size = 0;
+    }
+
+    return result;
+}
+
 _Noreturn void
 Quit(int code, const char *msg, ...)
 {
