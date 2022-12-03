@@ -1,0 +1,98 @@
+---
+Language: Cpp
+Standard: c++17
+
+BasedOnStyle: GNU
+
+AccessModifierOffset: -4
+AlignAfterOpenBracket: DontAlign
+AlignArrayOfStructures: Right
+AlignConsecutiveMacros: Consecutive
+AlignEscapedNewlines: Left
+AlignOperands: AlignAfterOperator
+AllowShortBlocksOnASingleLine: Empty
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: WithoutElse
+AlwaysBreakAfterDefinitionReturnType: None
+AlwaysBreakAfterReturnType: TopLevelDefinitions
+AttributeMacros:
+  - __watcall
+  - __declspec
+  - __near
+  - __far
+  - __huge
+  - __interrupt
+  - __unaligned
+  - __based
+  - __segname
+  - __far
+  - __segment
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterControlStatement: MultiLine
+  AfterEnum: false
+  AfterFunction: true
+  AfterNamespace: false
+  AfterStruct: false
+  AfterUnion: false
+  AfterExternBlock: false
+  BeforeCatch: false
+  BeforeElse: false
+  BeforeWhile: false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+BreakConstructorInitializers: BeforeComma
+BreakInheritanceList: BeforeComma
+BreakStringLiterals: false
+ColumnLimit: 0
+DeriveLineEnding: false
+FixNamespaceComments: true
+IndentExternBlock: NoIndent
+IndentGotoLabels: false
+IndentPPDirectives: AfterHash
+IndentWidth: 4
+KeepEmptyLinesAtTheStartOfBlocks: false
+NamespaceIndentation: All
+PackConstructorInitializers: Never
+SortIncludes: Never
+SeparateDefinitionBlocks: Always
+SpaceAfterCStyleCast: true
+SpaceAfterTemplateKeyword: false
+SpaceAroundPointerQualifiers: Both
+SpaceBeforeParens: Custom
+SpaceBeforeParensOptions:
+  AfterControlStatements: true
+  AfterIfMacros: true
+SpacesBeforeTrailingComments: 2
+StatementAttributeLikeMacros:
+  - _WCCALLBACK
+  - _WCNORETURN
+  - _WCNEAR
+  - _WCFAR
+  - _WCHUGE
+  - _WCINTERRUPT
+  - _WCUNALIGNED
+  - _WCI86NEAR
+  - _WCI86FAR
+  - _WCI86HUGE
+  - _WCI86NEAR
+  - _WCI86FAR
+  - _WCI86HUGE
+  - _WCCALLBACK
+  - _WCNORETURN
+  - _WCNEAR
+  - _WCFAR
+  - _WCHUGE
+  - _WCI86NEAR
+  - _WCI86FAR
+  - _WCI86HUGE
+  - _WCINTERRUPT
+  - _WCUNALIGNED
+  - _WCCALLBACK
+StatementMacros:
+  - MK_FP
+  - XARGON_UNUSED
+TabWidth: 4
+...
