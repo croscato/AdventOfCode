@@ -31,11 +31,36 @@ For example:
       middle four lights.
 
 After following the instructions, how many lights are lit?
+
+
+--- Part Two ---
+
+You just finish implementing your winning light pattern when you realize
+you mistranslated Santa's message from Ancient Nordic Elvish.
+
+The light grid you bought actually has individual brightness controls; each
+light can have a brightness of zero or more. The lights all start at zero.
+
+The phrase turn on actually means that you should increase the brightness
+of those lights by 1.
+
+The phrase turn off actually means that you should decrease the brightness
+of those lights by 1, to a minimum of zero.
+
+The phrase toggle actually means that you should increase the brightness of
+those lights by 2.
+
+What is the total brightness of all lights combined after following Santa's
+instructions?
+
+For example:
+    - turn on 0,0 through 0,0 would increase the total brightness by 1.
+    - toggle 0,0 through 999,999 would increase the total brightness by
+      2000000.
 */
 
-#define GRID_SIZE 1000
 #define GRID_ROWS 1000
-#define GRID_COLS 16
+#define GRID_COLS 1000
 
 typedef enum Action {
       Invalid
@@ -59,7 +84,7 @@ typedef struct Input {
     Range range;
 } Input;
 
-u64 grid[GRID_ROWS][GRID_COLS] = {0};
+u16 grid[GRID_ROWS][GRID_COLS] = {0};
 
 typedef void (* Grid_Apply)(Coordinate coordinate);
 
@@ -68,33 +93,13 @@ static const Slice ActionOff = { "turn off", 8 };
 static const Slice ActionToggle = { "toggle", 6 };
 static const Slice DataDivision = { "through", 7 };
 
-void
-Print_Grid(void)
-{
-    for (u16 row = 0; row < GRID_ROWS; ++row) {
-        for (u16 col = 0; col < GRID_COLS; ++col) {
-            u64 data = grid[row][col];
-
-            printf("%016lx%c", data, (col < GRID_COLS - 1) ? ':' : '\n');
-        }
-    }
-}
-
-void
-Print_Range(Range range)
-{
-    printf("Range(%u,%u:%u,%u)\n",
-        range.start.row, range.start.col, range.end.row, range.end.col
-    );
-}
-
 static void
 Grid_CheckRange(Range range)
 {
     if (
         (range.end.col < range.start.col || range.end.row < range.start.row) ||
-        (range.start.col > GRID_SIZE || range.start.row > GRID_SIZE) ||
-        (range.end.col > GRID_SIZE || range.end.row > GRID_SIZE)
+        (range.start.col > GRID_COLS || range.start.row > GRID_ROWS) ||
+        (range.end.col > GRID_COLS || range.end.row > GRID_ROWS)
     ) {
         Quit(2, "%s: Invalid range (%u,%u:%u,%u).\n", NAME,
             range.start.row, range.start.col, range.end.row, range.end.col
@@ -103,21 +108,51 @@ Grid_CheckRange(Range range)
 }
 
 static void
-Grid_On(Coordinate coordinate)
+Grid_Reset()
 {
-    grid[coordinate.row][coordinate.col / 64] |= (1ul << (coordinate.col % 64));
+    for (u16 row = 0; row < GRID_ROWS; ++row) {
+        for (u16 col = 0; col < GRID_COLS; ++col) {
+            grid[row][col] = 0;
+        }
+    }
 }
 
 static void
-Grid_Off(Coordinate coordinate)
+Grid_OnOne(Coordinate coordinate)
 {
-    grid[coordinate.row][coordinate.col / 64] &= ~(1ul << (coordinate.col % 64));
+    grid[coordinate.row][coordinate.col] = true;
 }
 
 static void
-Grid_Toggle(Coordinate coordinate)
+Grid_OffOne(Coordinate coordinate)
 {
-    grid[coordinate.row][coordinate.col / 64] ^= (1ul << (coordinate.col % 64));
+    grid[coordinate.row][coordinate.col] = false;
+}
+
+static void
+Grid_ToggleOne(Coordinate coordinate)
+{
+    grid[coordinate.row][coordinate.col] ^= true;
+}
+
+static void
+Grid_OnTwo(Coordinate coordinate)
+{
+    grid[coordinate.row][coordinate.col]++;
+}
+
+static void
+Grid_OffTwo(Coordinate coordinate)
+{
+    if (grid[coordinate.row][coordinate.col] > 0) {
+        grid[coordinate.row][coordinate.col]--;
+    }
+}
+
+static void
+Grid_ToggleTwo(Coordinate coordinate)
+{
+    grid[coordinate.row][coordinate.col] += 2;
 }
 
 static void
@@ -143,7 +178,7 @@ Grid_Count(Action action)
 
     for (u16 row = 0; row < GRID_ROWS; ++row) {
         for (u16 col = 0; col < GRID_COLS; ++col) {
-            u64 data = grid[row][col];
+            u16 data = grid[row][col];
 
             while (data) {
                 if (action == On && (data & 0x01)) {
@@ -158,6 +193,20 @@ Grid_Count(Action action)
     }
 
     return count;
+}
+
+u64
+Grid_Brigthness(void)
+{
+    u64 brightness = 0;
+
+    for (u16 row = 0; row < GRID_ROWS; ++row) {
+        for (u16 col = 0; col < GRID_COLS; ++col) {
+            brightness += grid[row][col];
+        }
+    }
+
+    return brightness;
 }
 
 const char *
@@ -250,11 +299,11 @@ Part_One(Slice data)
         Input input = Parse_Input(line.data);
 
         if (input.action == On) {
-            Grid_ForRange(input.range, Grid_On);
+            Grid_ForRange(input.range, Grid_OnOne);
         } else if (input.action == Off) {
-            Grid_ForRange(input.range, Grid_Off);
+            Grid_ForRange(input.range, Grid_OffOne);
         } else if (input.action == Toggle) {
-            Grid_ForRange(input.range, Grid_Toggle);
+            Grid_ForRange(input.range, Grid_ToggleOne);
         }
     }
 
@@ -264,7 +313,25 @@ Part_One(Slice data)
 void
 Part_Two(Slice data)
 {
-    UNUSED(data);
+    while (1) {
+        Slice line = Slice_ReadLine(&data);
+
+        if (line.data == NULL) {
+            break;
+        }
+
+        Input input = Parse_Input(line.data);
+
+        if (input.action == On) {
+            Grid_ForRange(input.range, Grid_OnTwo);
+        } else if (input.action == Off) {
+            Grid_ForRange(input.range, Grid_OffTwo);
+        } else if (input.action == Toggle) {
+            Grid_ForRange(input.range, Grid_ToggleTwo);
+        }
+    }
+
+    printf("Part two: %lu brightness\n", Grid_Brigthness());
 }
 
 int
@@ -277,6 +344,7 @@ main(void)
     }
 
     Part_One(input);
+    Grid_Reset();
     Part_Two(input);
 
     return 0;
