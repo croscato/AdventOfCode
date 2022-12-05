@@ -26,7 +26,7 @@ ADVENT_NR = 3
 CFLAGS += -DNAME=\"Advent_$(ADVENT_YEAR)_$(ADVENT_NR)\"
 
 SRCS = \
-	main.c \
+	main.c
 
 .PHONY: all release debug run test clean
 

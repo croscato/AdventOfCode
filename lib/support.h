@@ -17,9 +17,7 @@ extern u64 DebugLine;
     goto tag;                 \
 }
 
-Slice StdIn_ReadAll(void);
 const char *StdIn_ReadLine(void);
-Slice Slice_ReadLine(Slice *slice);
 
 _Noreturn void Quit(int code, const char *msg, ...);
 

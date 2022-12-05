@@ -11,6 +11,7 @@
 #include <inttypes.h>
 #include <errno.h>
 #include <string.h>
+#include <ctype.h>
 
 typedef int8_t i8;
 typedef int16_t i16;
@@ -23,13 +24,10 @@ typedef uint64_t u64;
 
 #define UNUSED(param) ((void)(param))
 
-typedef struct {
-    const char *data;
-    u64 size;
-} Slice;
-
 #include "support.h"
 #include "md5.h"
+#include "map.h"
+#include "slice.h"
 
 #endif // DEFS_H
 

@@ -337,7 +337,7 @@ Part_Two(Slice data)
 int
 main(void)
 {
-    Slice input = StdIn_ReadAll();
+    Slice input = Slice_ReadStdIn();
 
     if (input.data == NULL || *input.data == '\0') {
         Quit(1, "%s: empty input.", NAME);

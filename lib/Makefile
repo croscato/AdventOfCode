@@ -5,7 +5,9 @@ ARFLAGS=rcs
 
 SRCS= \
 	support.c \
-	md5.c
+	md5.c \
+	map.c \
+	slice.c
 
 OBJS=$(SRCS:.c=.c.o)
 DEPS=$(OBJS:=.d)

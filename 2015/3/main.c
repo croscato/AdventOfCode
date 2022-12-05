@@ -50,6 +50,8 @@ For example:
 // East  >
 // West  <
 
+#include "map.h"
+
 #define MAP_SIZE 2048
 #define MAP_HASH_PRIME_1 251
 #define MAP_HASH_PRIME_2 457
@@ -59,123 +61,60 @@ typedef struct MapKey {
     i32 y;
 } MapKey;
 
-typedef struct MapItem {
-    MapKey key;
-    struct MapItem *next;
-} MapItem;
+typedef u64 MapValue;
 
-typedef struct Map {
-    MapItem **data;
-} Map;
+typedef struct MapData {
+    MapKey *key;
+    MapValue *value;
+} MapData;
 
-static Map
-Map_Create()
+static MapData
+Map_CreateData(MapKey key, MapValue value)
 {
-    u64 alloc_size = sizeof(MapItem *) * MAP_SIZE;
+    MapData result;
 
-    MapItem **data = malloc(alloc_size);
+    result.key = malloc(sizeof(MapKey));
+    result.value = malloc(sizeof(MapValue));
 
-    if (data == NULL) {
-        Quit(2, "%s: out of memory.");
+    if (result.key == NULL || result.value == NULL) {
+        Quit(3, "%s: out of memory.", NAME);
     }
 
-    for (int i = 0; i < MAP_SIZE; ++i) {
-        data[i] = NULL;
-    }
+    *result.key = key;
+    *result.value = value;
 
-
-    return (Map){data};
+    return result;
 }
 
 static u64
-Map_Hash(MapKey key)
+Map_Hash(void *key)
 {
+    MapKey *map_key = (MapKey *) key;
+
     u64 hash_value = (u64) (
-        (key.x * MAP_HASH_PRIME_1) +
-        (key.y * MAP_HASH_PRIME_2)
+        (map_key->x * MAP_HASH_PRIME_1) +
+        (map_key->y * MAP_HASH_PRIME_2)
     ) % (MAP_SIZE - 1);
 
     if (hash_value >= MAP_SIZE) {
-        Quit(4, "%s: invalid hash: %lu\n", NAME, hash_value);
+        Quit(2, "%s: invalid hash: %lu\n", NAME, hash_value);
     }
 
     return hash_value;
 }
 
 static bool
-Map_Compare(MapKey left, MapKey right)
+Map_Compare(void *left, void *right)
 {
-    return left.x == right.x &&
-           left.y == right.y;
-}
+    MapKey *key_left = (MapKey *) left;
+    MapKey *key_right = (MapKey *) right;
 
-static bool
-Map_Insert(Map map, MapKey key)
-{
-    u64 hash = Map_Hash(key);
-
-    MapItem *item = map.data[hash];
-    MapItem *parent = NULL;
-
-    if (item != NULL) {
-        do {
-            if (Map_Compare(item->key, key)) {
-                return false;
-            }
-
-            parent = item;
-            item = item->next;
-        } while (item != NULL);
-    }
-
-    item = malloc(sizeof(MapItem));
-
-    if (item == NULL) {
-        Quit(3, "%s: out of memory.", NAME);
-    }
-
-    item->key = key;
-    item->next = NULL;
-
-    if (parent) {
-        parent->next = item;
-    } else {
-        map.data[hash] = item;
-    }
-
-    return true;
+    return key_left->x == key_right->x &&
+           key_left->y == key_right->y;
 }
 
 static void
-Map_Destroy(Map *map)
-{
-    if (map && map->data) {
-        MapItem *item;
-
-        for (int i = 0; i < MAP_SIZE; ++i) {
-            item = map->data[i];
-
-            if (item == NULL) {
-                continue;
-            }
-
-            while (item != NULL) {
-                MapItem *parent = item;
-
-                item = item->next;
-
-                free(parent);
-            }
-        }
-
-        free(map->data);
-
-        map->data = NULL;
-    }
-}
-
-static void
-Move(MapKey *key, char movement)
+Map_Move(MapKey *key, char movement)
 {
     if (movement == '^') {
         key->y--;
@@ -193,16 +132,22 @@ Part_One(const char *data)
 {
     u64 houses = 0;
 
-    MapKey santa = {0, 0};
+    MapKey santa = {0,0};
 
-    Map map = Map_Create();
+    Map *map = NULL;
 
-    Map_Insert(map, santa);
+    Map_Create(&map, MAP_SIZE, Map_Hash, Map_Compare);
+
+    MapData map_data = Map_CreateData(santa, 0);
+
+    Map_Insert(map, map_data.key, map_data.value);
 
     while (*data != '\n' && *data != '\0') {
-        Move(&santa, *data);
+        Map_Move(&santa, *data);
 
-        if (Map_Insert(map, santa)) {
+        map_data = Map_CreateData(santa, 0);
+
+        if (Map_Insert(map, map_data.key, map_data.value)) {
             houses++;
         }
 
@@ -220,26 +165,33 @@ Part_Two(const char *data)
     u64 houses_santa = 0;
     u64 houses_robot = 0;
 
-    MapKey santa = {0, 0};
-    MapKey robot = {0, 0};
+    MapKey santa = {0,0};
+    MapKey robot = {0,0};
 
-    Map map = Map_Create();
+    Map *map = NULL;
 
-    Map_Insert(map, (MapKey){0, 0});
+    Map_Create(&map, MAP_SIZE, Map_Hash, Map_Compare);
+
+    MapData map_data = Map_CreateData(santa, 0);
+    Map_Insert(map, map_data.key, map_data.value);
 
     u8 santa_turn = true;
 
     while (*data != '\0') {
         if (santa_turn) {
-            Move(&santa, *data);
+            Map_Move(&santa, *data);
 
-            if (Map_Insert(map, santa)) {
+            map_data = Map_CreateData(santa, 0);
+
+            if (Map_Insert(map, map_data.key, map_data.value)) {
                 houses_santa++;
             }
         } else {
-            Move(&robot, *data);
+            Map_Move(&robot, *data);
 
-            if (Map_Insert(map, robot)) {
+            map_data = Map_CreateData(robot, 0);
+
+            if (Map_Insert(map, map_data.key, map_data.value)) {
                 houses_robot++;
             }
         }
@@ -256,7 +208,7 @@ Part_Two(const char *data)
 int
 main(void)
 {
-    Slice input = StdIn_ReadAll();
+    Slice input = Slice_ReadStdIn();
 
     if (input.data == NULL || *input.data == '\0') {
         Quit(1, "%s: empty input.", NAME);

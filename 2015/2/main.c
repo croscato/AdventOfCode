@@ -180,7 +180,7 @@ Part_Two(Slice slice)
 int
 main(void)
 {
-    Slice slice = StdIn_ReadAll();
+    Slice slice = Slice_ReadStdIn();
 
     if (slice.data == NULL || *slice.data == '\0') {
         Quit(1, "%s: empty input.", NAME);
