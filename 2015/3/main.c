@@ -68,7 +68,7 @@ typedef struct Map {
     MapItem **data;
 } Map;
 
-Map
+static Map
 Map_Create()
 {
     u64 alloc_size = sizeof(MapItem *) * MAP_SIZE;
@@ -79,7 +79,7 @@ Map_Create()
         Quit(2, "%s: out of memory.");
     }
 
-    for (int i = 0; i < MAP_SIZE - 1; ++i) {
+    for (int i = 0; i < MAP_SIZE; ++i) {
         data[i] = NULL;
     }
 
@@ -87,23 +87,29 @@ Map_Create()
     return (Map){data};
 }
 
-u64
+static u64
 Map_Hash(MapKey key)
 {
-    return (
+    u64 hash_value = (u64) (
         (key.x * MAP_HASH_PRIME_1) +
         (key.y * MAP_HASH_PRIME_2)
-    ) & (MAP_SIZE - 1);
+    ) % (MAP_SIZE - 1);
+
+    if (hash_value >= MAP_SIZE) {
+        Quit(4, "%s: invalid hash: %lu\n", NAME, hash_value);
+    }
+
+    return hash_value;
 }
 
-bool
+static bool
 Map_Compare(MapKey left, MapKey right)
 {
-    return left.x == right.x ||
+    return left.x == right.x &&
            left.y == right.y;
 }
 
-bool
+static bool
 Map_Insert(Map map, MapKey key)
 {
     u64 hash = Map_Hash(key);
@@ -125,7 +131,7 @@ Map_Insert(Map map, MapKey key)
     item = malloc(sizeof(MapItem));
 
     if (item == NULL) {
-        Quit(2, "%s: out of memory.", NAME);
+        Quit(3, "%s: out of memory.", NAME);
     }
 
     item->key = key;
@@ -140,7 +146,7 @@ Map_Insert(Map map, MapKey key)
     return true;
 }
 
-void
+static void
 Map_Destroy(Map *map)
 {
     if (map && map->data) {
@@ -168,7 +174,7 @@ Map_Destroy(Map *map)
     }
 }
 
-void
+static void
 Move(MapKey *key, char movement)
 {
     if (movement == '^') {
@@ -217,35 +223,32 @@ Part_Two(const char *data)
     MapKey santa = {0, 0};
     MapKey robot = {0, 0};
 
-    Map map_santa = Map_Create();
-    Map map_robot = Map_Create();
+    Map map = Map_Create();
 
-    Map_Insert(map_santa, santa);
-    Map_Insert(map_robot, robot);
+    Map_Insert(map, (MapKey){0, 0});
 
-    i32 turn = 1;
+    u8 santa_turn = true;
 
-    while (*data != '\n' && *data != '\0') {
-        if (turn % 2 == 1) {
+    while (*data != '\0') {
+        if (santa_turn) {
             Move(&santa, *data);
 
-            if (Map_Insert(map_santa, santa)) {
+            if (Map_Insert(map, santa)) {
                 houses_santa++;
             }
         } else {
             Move(&robot, *data);
 
-            if (Map_Insert(map_robot, robot)) {
+            if (Map_Insert(map, robot)) {
                 houses_robot++;
             }
         }
 
-        turn++;
+        santa_turn ^= true;
         data++;
     }
 
-    Map_Destroy(&map_santa);
-    Map_Destroy(&map_robot);
+    Map_Destroy(&map);
 
     printf("Part two: %lu houses\n", houses_santa + houses_robot + 1);
 }
