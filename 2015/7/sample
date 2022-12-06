@@ -1,0 +1,5 @@
+x OR y -> z
+NOT x -> b
+10 -> x
+20 -> y
+NOT y -> a
