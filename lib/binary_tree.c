@@ -16,5 +16,7 @@ struct BinaryTree {
 void
 BinaryTree_Create(BinaryTree **tree, BinaryTreeConfig config)
 {
+    UNUSED(tree);
+    UNUSED(config);
 }
 

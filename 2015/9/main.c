@@ -74,7 +74,7 @@ typedef TreeConnection * (*Tree_FindFunction)(u64 id, TreeNode **node);
 u64
 Hash_PJW(const void *data)
 {
-    const u8 *str = (u8 *) data;
+    const u8 *str = (const u8 *) data;
 
     u64 hash = 0;
     u64 high;
@@ -177,7 +177,7 @@ Tree_Insert(const char *city_1_name, const char *city_2_name, u64 distance)
 }
 
 void
-Tree_Print()
+Tree_Print(void)
 {
     TreeNode *cursor = tree;
 

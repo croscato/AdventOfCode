@@ -44,7 +44,7 @@ documentation and/or software.
 static void MD5Transform(UINT4 state[4], const unsigned char block[64]);
 static void Encode(unsigned char *output, const UINT4 *input, unsigned int len);
 static void Decode(UINT4 *output, const unsigned char *input, unsigned int len);
-static void MD5_memcpy(POINTER output, const POINTER input, unsigned int len);
+static void MD5_memcpy(POINTER output, const unsigned char *input, unsigned int len);
 static void MD5_memset(POINTER output, int value, unsigned int len);
 
 static unsigned char PADDING[64] = {
@@ -124,7 +124,7 @@ MD5Update(MD5_CTX *context, const unsigned char *input, unsigned int inputLen)
 
     // Transform as many times as possible.
     if (inputLen >= partLen) {
-        MD5_memcpy((POINTER) &context->buffer[index], (POINTER) input, partLen);
+        MD5_memcpy((POINTER) &context->buffer[index], input, partLen);
         MD5Transform(context->state, context->buffer);
 
         for (i = partLen; i + 63 < inputLen; i += 64)
@@ -136,7 +136,7 @@ MD5Update(MD5_CTX *context, const unsigned char *input, unsigned int inputLen)
     }
 
     // Buffer remaining input
-    MD5_memcpy((POINTER) &context->buffer[index], (POINTER) &input[i], inputLen - i);
+    MD5_memcpy((POINTER) &context->buffer[index], &input[i], inputLen - i);
 }
 
 // MD5 finalization. Ends an MD5 message-digest operation, writing the
@@ -284,7 +284,7 @@ Decode(UINT4 *output, const unsigned char *input, unsigned int len)
 
 // Note: Replace "for loop" with standard memcpy if possible.
 void
-MD5_memcpy(POINTER output, const POINTER input, unsigned int len)
+MD5_memcpy(POINTER output, const unsigned char *input, unsigned int len)
 {
     unsigned int i;
 

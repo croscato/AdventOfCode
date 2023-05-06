@@ -198,13 +198,13 @@ Signal_Override(const Register reg)
 }
 
 static u16
-Signal_Load(Register reg)
+Signal_Load(const Register reg)
 {
     return (u16) *Signal_Address(reg);
 }
 
 static void
-Signal_Store(Register reg, u16 value)
+Signal_Store(const Register reg, u16 value)
 {
     if (*Signal_Address(reg) & SIGNAL_OVERRIDE) {
         return;
