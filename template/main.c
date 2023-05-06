@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Gustavo Ribeiro Croscato
+// Copyright (c) 2023 Gustavo Ribeiro Croscato
 // SPDX-License-Identifier: MIT
 
 void
