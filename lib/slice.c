@@ -1,7 +1,7 @@
 // Copyright (c) 2022 Gustavo Ribeiro Croscato
 // SPDX-License-Identifier: MIT
 
-#define SLICE_BUFFER_SIZE 32 * 1024
+#define SLICE_BUFFER_SIZE 64 * 1024
 
 static char SliceBuffer[SLICE_BUFFER_SIZE];
 static const Slice NullSlice = {NULL, 0};
@@ -131,7 +131,7 @@ Slice_ReadLine(Slice *slice)
         return NullSlice;
     }
 
-    char *cursor = (char *) slice->data;
+    char *cursor = SliceBuffer + (slice->data - SliceBuffer);
     u64 available = slice->size;
 
     u64 new_size = 0;

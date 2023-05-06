@@ -97,8 +97,7 @@ Password_Check(const char *password)
         // Rule #3
         if (
             i <= length - 2 &&
-            letter == password[i + 1] &&
-            (i == 0 || password[i - 1] != letter)
+            letter == password[i + 1]
         ) {
             rule_3_check |= 1u << (letter - 'a');
         }
